@@ -1,0 +1,79 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+# Installing Packages
+install.packages ("tidyverse")
+install.packages("caret")
+install.packages("ROCR")
+install.packages("ROSE")
+install.packages("readxl")
+
+# Loading Libraries
+library(tidyverse)
+library(caret)
+library(ROCR)
+library(ROSE)
+library(readxl)
+
+# Setting Working Directory
+setwd("/Users/alijazibrizvi/Documents/Data Analytics/Self-Project | Social Science & Demography")
+
+# Reading Dataset into R & Ensuring Column Data Types are Imported Currently (was giving some Problems, Earlier)
+df <- read_excel("Final_MergedFile_withMeasures.xlsx", col_types = c("text", "text", "text", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric"))
+
+View(df)
+```
+
+```{r}
+# Turning off Scientific Notation for all Variables
+options(scipen=999)
+
+# Getting a Summary of the Dataset
+summary(df)
+```
+
+```{r}
+# Let's first Rename an Important Column
+colnames(df)[colnames(df) == "Total | 00002901 || Food available for consumption | 000664 || kilocalories per day"] <- "Total Food Available (Kilocalories per day)"
+
+options(scipen=999)
+```
+
+
+Will Build a Multiple Regression to Measure Effects on Students' Scores on the Science scale from a variety
+of key factors including: scores on the Reading scale (the Mathematics scale scores were Excluded as they only had scores for Male students), the GDP per Capita of a Nation, the Share of a Country's Urban Population,
+and the Total Food Available in a Country at a Given Time interval.
+
+```{r}
+# Ensure that the DataFrame is Ordered by Country and then Year
+df <- df[order(df$Country, df$Year), ]
+
+# Let's get to Building a Multiple Regression Model
+mul_reg <- lm(`Average performance of 15-year-old students on the science scale` ~ 
+              `Average performance of 15-year-old students on the reading scale` + 
+              `GDP per Capita ($)` + 
+              `Urban Population (% of Total Population)` + 
+              `Total Food Available (Kilocalories per day)`, 
+              data = df)
+
+# Viewing the Multiple Regression Output
+summary(mul_reg)
+```
+
+```{r}
+# Installing the "lm.beta" package to extract Standardized Regression coefficients
+install.packages("lm.beta")
+# Loading "lm.beta"
+library(lm.beta)
+
+# Extracting Standardized Regression coefficients
+lm.beta(mul_reg)
+```
+
